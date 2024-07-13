@@ -10,12 +10,16 @@ class Car{
         this.friction=0.05
         this.maxVelo=maxVelo
         this.angle = 0
+        this.damage = false;
 
-        if(controlType=="KEYS"){
+        if(controlType != "DUMMY"){
             this.sensor = new Sensor(this);
+            this.brain = new NeuralNetwork(
+                [this.sensor.rayCount,6,4]
+            );
         }
         this.controls = new Controls(controlType);
-        this.damage = false;
+
     }
 
     update(roadBorders,traffic){
@@ -26,6 +30,12 @@ class Car{
         }
         if(this.sensor){
             this.sensor.update(roadBorders,traffic);
+            const offsets = this.sensor.readings.map(
+                s=>s==null?0:1-s.offset
+            );
+            const outputs = NeuralNetwork.feedForward(offsets,this.brain);
+            console.log(outputs);
+
         }
     }
 
